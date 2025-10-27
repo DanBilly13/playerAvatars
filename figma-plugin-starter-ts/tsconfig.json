@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "lib": ["es2017", "dom"],
+    "module": "commonjs",
+    "rootDir": "src",
+    "outDir": "dist",
+    "types": ["@figma/plugin-typings"],
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/**/*.ts"]
+}

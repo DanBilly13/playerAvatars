@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font: 12px Inter, sans-serif;
+        margin: 14px;
+      }
+      h3 {
+        margin: 0 0 10px;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .field {
+        margin: 8px 0;
+      }
+      input,
+      button {
+        padding: 6px 8px;
+      }
+      button {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .hint {
+        color: #666;
+        font-size: 11px;
+      }
+      pre {
+        background: #f6f6f6;
+        padding: 8px;
+        border-radius: 6px;
+        height: 120px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Populate Lineup</h3>
+
+    <input
+      id="imgBase"
+      type="hidden"
+      value="https://cdn.jsdelivr.net/gh/DanBilly13/playerAvatars@main"
+    />
+
+    <div class="field">
+      <label>Avatar set</label>
+      <div class="row">
+        <select id="teamFolder">
+          <option value="blueTeamBoys" selected>Blue Team — Boys</option>
+          <option value="blueTeamGirls">Blue Team — Girls</option>
+          <option value="redTeamBoys">Red Team — Boys</option>
+          <option value="redTeamGirls">Red Team — Girls</option>
+        </select>
+      </div>
+      <div class="hint">Loads 01.png, 02.png, … from the selected folder.</div>
+    </div>
+
+    <div class="row field">
+      <label for="start">Start shirt number</label>
+      <input id="start" type="number" min="1" value="1" />
+      <label><input id="shuffle" type="checkbox" /> Shuffle names</label>
+    </div>
+
+    <div class="field">
+      <label><input id="useAvatar" type="checkbox" /> Include avatars</label>
+    </div>
+    <div class="field" id="avatarStyleRow" style="display: none">
+      <label>Avatar style</label>
+      <div class="row">
+        <label
+          ><input type="radio" name="avatarStyle" value="vector" /> Vector
+          initials</label
+        >
+        <label
+          ><input type="radio" name="avatarStyle" value="image" checked /> Image
+          PNGs</label
+        >
+      </div>
+      <div class="hint">
+        For <b>Image PNGs</b>, set a base URL above and a remote folder (e.g.
+        <code>blueTeamBoys</code>). The plugin will load <code>01.png</code>,
+        <code>02.png</code>, …
+      </div>
+    </div>
+
+    <div class="row field">
+      <button id="scan">Scan</button>
+      <button id="populate">Populate selection</button>
+    </div>
+
+    <div class="field hint">
+      Selection must contain text layers named <b>player-name</b> and
+      <b>shirt-number</b>.<br />
+      To apply avatars, include a shape (ellipse/rect/frame) named
+      <b>avatar</b>, <b>player-avatar</b>, or <b>photo</b> in each item — the
+      plugin updates its first fill.<br />
+      Avatars are fetched from the hard-coded base URL and the selected
+      <b>Avatar set</b> folder (e.g. <code>blueTeamBoys/01.png</code>,
+      <code>02.png</code>, …).
+    </div>
+
+    <pre id="log"></pre>
+
+    <script>
+      const log = (obj) => {
+        const pre = document.getElementById("log");
+        pre.textContent =
+          typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      };
+
+      const useAvatarEl = document.getElementById("useAvatar");
+      const avatarStyleRow = document.getElementById("avatarStyleRow");
+      function updatePickerVisibility() {
+        const styleRadios = Array.from(
+          document.querySelectorAll('input[name="avatarStyle"]')
+        );
+        const avatarMode =
+          (styleRadios.find((r) => r.checked) || {}).value || "vector";
+        avatarStyleRow.style.display = useAvatarEl.checked ? "block" : "none";
+      }
+      document
+        .querySelectorAll('input[name="avatarStyle"]')
+        .forEach((r) => r.addEventListener("change", updatePickerVisibility));
+      useAvatarEl.addEventListener("change", updatePickerVisibility);
+      updatePickerVisibility();
+
+      onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (!msg) return;
+        if (msg.type === "scan-result") log(msg.payload);
+        if (msg.type === "error") log(msg.payload);
+      };
+
+      document.getElementById("scan").onclick = () => {
+        const radios = Array.from(
+          document.querySelectorAll('input[name="names"]')
+        );
+        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        parent.postMessage(
+          { pluginMessage: { type: "scan", nameSet: choice, locale: "en" } },
+          "*"
+        );
+      };
+      document.getElementById("populate").onclick = async () => {
+        const radios = Array.from(
+          document.querySelectorAll('input[name="names"]')
+        );
+        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        const start = parseInt(
+          document.getElementById("start").value || "1",
+          10
+        );
+        const shuffle = document.getElementById("shuffle").checked;
+        const useAvatar = document.getElementById("useAvatar").checked;
+
+        const styleRadios = Array.from(
+          document.querySelectorAll('input[name="avatarStyle"]')
+        );
+        const avatarMode =
+          (styleRadios.find((r) => r.checked) || {}).value || "vector";
+
+        const imgBaseEl = document.getElementById("imgBase");
+        const imgBase =
+          imgBaseEl && "value" in imgBaseEl ? imgBaseEl.value : "";
+        const teamFolderEl = document.getElementById("teamFolder");
+        const teamFolder =
+          teamFolderEl && "value" in teamFolderEl ? teamFolderEl.value : "";
+
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "populate",
+              nameSet: choice,
+              startNumber: start,
+              shuffle,
+              useAvatar,
+              avatarMode,
+              imgBase,
+              teamFolder,
+            },
+          },
+          "*"
+        );
+      };
+    </script>
+  </body>
+</html>

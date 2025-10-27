@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/figma-plugin-ds@latest/dist/figma-plugin-ds.css"
+    />
+    <style>
+      body.container {
+        padding: 12px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      #log {
+        background: #f6f8fb;
+        border: 1px solid #dfe3ea;
+        border-radius: 6px;
+        padding: 8px;
+        height: 120px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body class="container container--thin">
+    <div class="section">
+      <h3 class="type type--bold">Populate Lineup</h3>
+    </div>
+
+    <!-- Hidden base (unchanged) -->
+    <input
+      id="imgBase"
+      type="hidden"
+      value="https://cdn.jsdelivr.net/gh/DanBilly13/playerAvatars@main"
+    />
+
+    <div class="section">
+      <div class="section-title">Avatar set</div>
+      <div class="select">
+        <select id="teamFolder" class="select__element">
+          <option value="blueTeamBoys" selected>Blue Team — Boys</option>
+          <option value="blueTeamGirls">Blue Team — Girls</option>
+          <option value="redTeamBoys">Red Team — Boys</option>
+          <option value="redTeamGirls">Red Team — Girls</option>
+        </select>
+        <div class="select__icon icon icon--chevron-down"></div>
+      </div>
+      <div class="type type--11 type--pos-negative">
+        Loads 01.png, 02.png, … from the selected folder.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row">
+        <div class="input">
+          <label class="label" for="start">Start shirt number</label>
+          <input
+            id="start"
+            type="number"
+            min="1"
+            value="1"
+            class="input__field"
+          />
+        </div>
+        <label class="checkbox" style="margin-top: 16px">
+          <input id="shuffle" type="checkbox" class="checkbox__box" />
+          <div class="checkbox__label">Shuffle names</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <label class="checkbox">
+        <input id="useAvatar" type="checkbox" class="checkbox__box" />
+        <div class="checkbox__label">Include avatars</div>
+      </label>
+
+      <div
+        class="row"
+        id="avatarStyleRow"
+        style="display: none; margin-top: 8px"
+      >
+        <label class="radio">
+          <input
+            type="radio"
+            name="avatarStyle"
+            value="vector"
+            class="radio__button"
+          />
+          <div class="radio__label">Vector initials</div>
+        </label>
+        <label class="radio">
+          <input
+            type="radio"
+            name="avatarStyle"
+            value="image"
+            class="radio__button"
+            checked
+          />
+          <div class="radio__label">Image PNGs</div>
+        </label>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row">
+        <button id="scan" class="button button--secondary">Scan</button>
+        <button id="populate" class="button button--primary">
+          Populate selection
+        </button>
+      </div>
+      <div class="type type--11 type--pos-negative" style="margin-top: 8px">
+        Selection must contain text layers named <b>player-name</b> and
+        <b>shirt-number</b>.<br />
+        Include a shape named <b>avatar</b>, <b>player-avatar</b>, or
+        <b>photo</b> — the plugin updates its first fill.
+      </div>
+    </div>
+
+    <pre id="log" class="type type--12"></pre>
+
+    <script>
+      const log = (obj) => {
+        const pre = document.getElementById("log");
+        pre.textContent =
+          typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      };
+
+      const useAvatarEl = document.getElementById("useAvatar");
+      const avatarStyleRow = document.getElementById("avatarStyleRow");
+      function updatePickerVisibility() {
+        const styleRadios = Array.from(
+          document.querySelectorAll('input[name="avatarStyle"]')
+        );
+        const avatarMode =
+          (styleRadios.find((r) => r.checked) || {}).value || "vector";
+        avatarStyleRow.style.display = useAvatarEl.checked ? "flex" : "none";
+      }
+      document
+        .querySelectorAll('input[name="avatarStyle"]')
+        .forEach((r) => r.addEventListener("change", updatePickerVisibility));
+      useAvatarEl.addEventListener("change", updatePickerVisibility);
+      updatePickerVisibility();
+
+      onmessage = (event) => {
+        const msg = event.data.pluginMessage;
+        if (!msg) return;
+        if (msg.type === "scan-result") log(msg.payload);
+        if (msg.type === "error") log(msg.payload);
+      };
+
+      document.getElementById("scan").onclick = () => {
+        const radios = Array.from(
+          document.querySelectorAll('input[name="names"]')
+        );
+        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        parent.postMessage(
+          { pluginMessage: { type: "scan", nameSet: choice, locale: "en" } },
+          "*"
+        );
+      };
+
+      document.getElementById("populate").onclick = async () => {
+        const radios = Array.from(
+          document.querySelectorAll('input[name="names"]')
+        );
+        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        const start = parseInt(
+          document.getElementById("start").value || "1",
+          10
+        );
+        const shuffle = document.getElementById("shuffle").checked;
+        const useAvatar = document.getElementById("useAvatar").checked;
+
+        const styleRadios = Array.from(
+          document.querySelectorAll('input[name="avatarStyle"]')
+        );
+        const avatarMode =
+          (styleRadios.find((r) => r.checked) || {}).value || "image";
+
+        const imgBaseEl = document.getElementById("imgBase");
+        const imgBase =
+          imgBaseEl && "value" in imgBaseEl ? imgBaseEl.value : "";
+        const teamFolderEl = document.getElementById("teamFolder");
+        const teamFolder =
+          teamFolderEl && "value" in teamFolderEl ? teamFolderEl.value : "";
+
+        parent.postMessage(
+          {
+            pluginMessage: {
+              type: "populate",
+              nameSet: choice,
+              startNumber: start,
+              shuffle,
+              useAvatar,
+              avatarMode,
+              imgBase,
+              teamFolder,
+            },
+          },
+          "*"
+        );
+      };
+    </script>
+  </body>
+</html>
