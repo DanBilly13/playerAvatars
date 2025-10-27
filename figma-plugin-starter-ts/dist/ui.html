@@ -2,10 +2,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <!-- Figma Plugin DS from CDN -->
     <link
       rel="stylesheet"
-      href="https://unpkg.com/figma-plugin-ds@latest/dist/figma-plugin-ds.css"
+      href="https://unpkg.com/figma-plugin-ds@1.0.1/dist/figma-plugin-ds.css"
     />
+    <script src="https://unpkg.com/figma-plugin-ds@1.0.1/dist/figma-plugin-ds.js"></script>
     <style>
       body.container {
         padding: 12px;
@@ -24,11 +26,14 @@
         height: 120px;
         overflow: auto;
       }
+      .section + .section {
+        margin-top: 8px;
+      }
     </style>
   </head>
   <body class="container container--thin">
     <div class="section">
-      <h3 class="type type--bold">Populate Lineup</h3>
+      <div class="type type--large type--bold">Populate Lineup</div>
     </div>
 
     <!-- Hidden base (unchanged) -->
@@ -39,20 +44,24 @@
     />
 
     <div class="section">
-      <div class="section-title">Avatar set</div>
-      <div class="select">
-        <select id="teamFolder" class="select__element">
-          <option value="blueTeamBoys" selected>Blue Team — Boys</option>
-          <option value="blueTeamGirls">Blue Team — Girls</option>
-          <option value="redTeamBoys">Red Team — Boys</option>
-          <option value="redTeamGirls">Red Team — Girls</option>
-        </select>
-        <div class="select__icon icon icon--chevron-down"></div>
+      <div class="input">
+        <label class="label" for="teamFolder">Avatar set</label>
+        <div class="select select--full">
+          <select id="teamFolder" class="select__element">
+            <option value="blueTeamBoys" selected>Blue Team — Boys</option>
+            <option value="blueTeamGirls">Blue Team — Girls</option>
+            <option value="redTeamBoys">Red Team — Boys</option>
+            <option value="redTeamGirls">Red Team — Girls</option>
+          </select>
+          <div class="select__icon icon icon--chevron-down"></div>
+        </div>
       </div>
-      <div class="type type--11 type--pos-negative">
+      <div class="type type--11 type--pos-negative" style="margin-top: 6px">
         Loads 01.png, 02.png, … from the selected folder.
       </div>
     </div>
+
+    <div class="divider"></div>
 
     <div class="section">
       <div class="row">
@@ -66,7 +75,7 @@
             class="input__field"
           />
         </div>
-        <label class="checkbox" style="margin-top: 16px">
+        <label class="checkbox" style="margin-top: 18px">
           <input id="shuffle" type="checkbox" class="checkbox__box" />
           <div class="checkbox__label">Shuffle names</div>
         </label>
@@ -113,11 +122,17 @@
           Populate selection
         </button>
       </div>
-      <div class="type type--11 type--pos-negative" style="margin-top: 8px">
-        Selection must contain text layers named <b>player-name</b> and
-        <b>shirt-number</b>.<br />
-        Include a shape named <b>avatar</b>, <b>player-avatar</b>, or
-        <b>photo</b> — the plugin updates its first fill.
+      <div
+        class="type type--11 type--pos-negative"
+        style="margin-top: 8px; line-height: 1.35"
+      >
+        Selection must contain text layers named
+        <span class="type type--bold">player-name</span> and
+        <span class="type type--bold">shirt-number</span>.<br />
+        Include a shape named <span class="type type--bold">avatar</span>,
+        <span class="type type--bold">player-avatar</span>, or
+        <span class="type type--bold">photo</span> — the plugin updates its
+        first fill.
       </div>
     </div>
 

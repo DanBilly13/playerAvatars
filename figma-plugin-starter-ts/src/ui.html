@@ -2,112 +2,141 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <!-- Figma Plugin DS from CDN -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/figma-plugin-ds@1.0.1/dist/figma-plugin-ds.css"
+    />
+    <script src="https://unpkg.com/figma-plugin-ds@1.0.1/dist/figma-plugin-ds.js"></script>
     <style>
-      body {
-        font: 12px Inter, sans-serif;
-        margin: 14px;
-      }
-      h3 {
-        margin: 0 0 10px;
+      body.container {
+        padding: 12px;
       }
       .row {
         display: flex;
-        gap: 10px;
+        gap: 8px;
         align-items: center;
         flex-wrap: wrap;
       }
-      .field {
-        margin: 8px 0;
-      }
-      input,
-      button {
-        padding: 6px 8px;
-      }
-      button {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-      }
-      .hint {
-        color: #666;
-        font-size: 11px;
-      }
-      pre {
-        background: #f6f6f6;
-        padding: 8px;
+      #log {
+        background: #f6f8fb;
+        border: 1px solid #dfe3ea;
         border-radius: 6px;
+        padding: 8px;
         height: 120px;
         overflow: auto;
       }
+      .section + .section {
+        margin-top: 8px;
+      }
     </style>
   </head>
-  <body>
-    <h3>Populate Lineup</h3>
+  <body class="container container--thin">
+    <div class="section">
+      <div class="type type--large type--bold">Populate Lineup</div>
+    </div>
 
+    <!-- Hidden base (unchanged) -->
     <input
       id="imgBase"
       type="hidden"
       value="https://cdn.jsdelivr.net/gh/DanBilly13/playerAvatars@main"
     />
 
-    <div class="field">
-      <label>Avatar set</label>
+    <div class="section">
+      <div class="input">
+        <label class="label" for="teamFolder">Avatar set</label>
+        <div class="select select--full">
+          <select id="teamFolder" class="select__element">
+            <option value="blueTeamBoys" selected>Blue Team — Boys</option>
+            <option value="blueTeamGirls">Blue Team — Girls</option>
+            <option value="redTeamBoys">Red Team — Boys</option>
+            <option value="redTeamGirls">Red Team — Girls</option>
+          </select>
+          <div class="select__icon icon icon--chevron-down"></div>
+        </div>
+      </div>
+      <div class="type type--11 type--pos-negative" style="margin-top: 6px">
+        Loads 01.png, 02.png, … from the selected folder.
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section">
       <div class="row">
-        <select id="teamFolder">
-          <option value="blueTeamBoys" selected>Blue Team — Boys</option>
-          <option value="blueTeamGirls">Blue Team — Girls</option>
-          <option value="redTeamBoys">Red Team — Boys</option>
-          <option value="redTeamGirls">Red Team — Girls</option>
-        </select>
+        <div class="input">
+          <label class="label" for="start">Start shirt number</label>
+          <input
+            id="start"
+            type="number"
+            min="1"
+            value="1"
+            class="input__field"
+          />
+        </div>
+        <label class="checkbox" style="margin-top: 18px">
+          <input id="shuffle" type="checkbox" class="checkbox__box" />
+          <div class="checkbox__label">Shuffle names</div>
+        </label>
       </div>
-      <div class="hint">Loads 01.png, 02.png, … from the selected folder.</div>
     </div>
 
-    <div class="row field">
-      <label for="start">Start shirt number</label>
-      <input id="start" type="number" min="1" value="1" />
-      <label><input id="shuffle" type="checkbox" /> Shuffle names</label>
+    <div class="section">
+      <label class="checkbox">
+        <input id="useAvatar" type="checkbox" class="checkbox__box" />
+        <div class="checkbox__label">Include avatars</div>
+      </label>
+
+      <div
+        class="row"
+        id="avatarStyleRow"
+        style="display: none; margin-top: 8px"
+      >
+        <label class="radio">
+          <input
+            type="radio"
+            name="avatarStyle"
+            value="vector"
+            class="radio__button"
+          />
+          <div class="radio__label">Vector initials</div>
+        </label>
+        <label class="radio">
+          <input
+            type="radio"
+            name="avatarStyle"
+            value="image"
+            class="radio__button"
+            checked
+          />
+          <div class="radio__label">Image PNGs</div>
+        </label>
+      </div>
     </div>
 
-    <div class="field">
-      <label><input id="useAvatar" type="checkbox" /> Include avatars</label>
-    </div>
-    <div class="field" id="avatarStyleRow" style="display: none">
-      <label>Avatar style</label>
+    <div class="section">
       <div class="row">
-        <label
-          ><input type="radio" name="avatarStyle" value="vector" /> Vector
-          initials</label
-        >
-        <label
-          ><input type="radio" name="avatarStyle" value="image" checked /> Image
-          PNGs</label
-        >
+        <button id="scan" class="button button--secondary">Scan</button>
+        <button id="populate" class="button button--primary">
+          Populate selection
+        </button>
       </div>
-      <div class="hint">
-        For <b>Image PNGs</b>, set a base URL above and a remote folder (e.g.
-        <code>blueTeamBoys</code>). The plugin will load <code>01.png</code>,
-        <code>02.png</code>, …
+      <div
+        class="type type--11 type--pos-negative"
+        style="margin-top: 8px; line-height: 1.35"
+      >
+        Selection must contain text layers named
+        <span class="type type--bold">player-name</span> and
+        <span class="type type--bold">shirt-number</span>.<br />
+        Include a shape named <span class="type type--bold">avatar</span>,
+        <span class="type type--bold">player-avatar</span>, or
+        <span class="type type--bold">photo</span> — the plugin updates its
+        first fill.
       </div>
     </div>
 
-    <div class="row field">
-      <button id="scan">Scan</button>
-      <button id="populate">Populate selection</button>
-    </div>
-
-    <div class="field hint">
-      Selection must contain text layers named <b>player-name</b> and
-      <b>shirt-number</b>.<br />
-      To apply avatars, include a shape (ellipse/rect/frame) named
-      <b>avatar</b>, <b>player-avatar</b>, or <b>photo</b> in each item — the
-      plugin updates its first fill.<br />
-      Avatars are fetched from the hard-coded base URL and the selected
-      <b>Avatar set</b> folder (e.g. <code>blueTeamBoys/01.png</code>,
-      <code>02.png</code>, …).
-    </div>
-
-    <pre id="log"></pre>
+    <pre id="log" class="type type--12"></pre>
 
     <script>
       const log = (obj) => {
@@ -124,7 +153,7 @@
         );
         const avatarMode =
           (styleRadios.find((r) => r.checked) || {}).value || "vector";
-        avatarStyleRow.style.display = useAvatarEl.checked ? "block" : "none";
+        avatarStyleRow.style.display = useAvatarEl.checked ? "flex" : "none";
       }
       document
         .querySelectorAll('input[name="avatarStyle"]')
@@ -149,6 +178,7 @@
           "*"
         );
       };
+
       document.getElementById("populate").onclick = async () => {
         const radios = Array.from(
           document.querySelectorAll('input[name="names"]')
@@ -165,7 +195,7 @@
           document.querySelectorAll('input[name="avatarStyle"]')
         );
         const avatarMode =
-          (styleRadios.find((r) => r.checked) || {}).value || "vector";
+          (styleRadios.find((r) => r.checked) || {}).value || "image";
 
         const imgBaseEl = document.getElementById("imgBase");
         const imgBase =

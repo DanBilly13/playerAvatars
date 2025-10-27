@@ -9,7 +9,8 @@
   "networkAccess": {
     "allowedDomains": [
       "https://raw.githubusercontent.com",
-      "https://cdn.jsdelivr.net"
+      "https://cdn.jsdelivr.net",
+      "https://unpkg.com"
     ]
   }
 }
