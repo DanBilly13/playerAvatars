@@ -362,9 +362,15 @@ function emailFromName(fullName: string, domain: string = "mail.com"): string {
   const cleanDomain = (domain || "mail.com").replace(/^@+/, "").trim();
   return base ? `${base}@${cleanDomain}` : `user@${cleanDomain}`;
 }
-function builtInNames(locale: string, useGirls: boolean): string[] {
+function builtInNames(
+  locale: string,
+  set: "boys" | "girls" | "unisex" = "boys"
+): string[] {
   const lc = normalizeLocale(locale);
-  const data: Record<string, { boys: string[]; girls: string[] }> = {
+  const data: Record<
+    string,
+    { boys: string[]; girls: string[]; unisex: string[] }
+  > = {
     en: {
       boys: [
         "Liam Carter",
@@ -400,9 +406,25 @@ function builtInNames(locale: string, useGirls: boolean): string[] {
         "Grace Mitchell",
         "Luna Foster",
       ],
+      unisex: [
+        "Alex Taylor",
+        "Charlie Morgan",
+        "Jamie Lee",
+        "Jordan Casey",
+        "Avery Parker",
+        "Riley Quinn",
+        "Rowan Carter",
+        "Reese Cameron",
+        "Dakota Blake",
+        "Emerson Gray",
+        "Skyler Bennett",
+        "Finley Hayes",
+        "Harley Collins",
+        "Taylor Brooks",
+        "Quinn Porter",
+      ],
     },
     sv: {
-      // Swedish
       boys: [
         "Liam Andersson",
         "Noah Johansson",
@@ -437,9 +459,25 @@ function builtInNames(locale: string, useGirls: boolean): string[] {
         "Tilda Sandberg",
         "Ines Lund",
       ],
+      unisex: [
+        "Alex Nilsson",
+        "Robin Svensson",
+        "Kim Andersson",
+        "Noel Berg",
+        "Elis Lindberg",
+        "Billie Holm",
+        "Charlie Persson",
+        "Jamie Larsson",
+        "Mika Eriksson",
+        "Lou Sandberg",
+        "Sam Lund",
+        "Sascha Gustafsson",
+        "Neo Olsson",
+        "Elli Karlsson",
+        "Rio Johansson",
+      ],
     },
     ch: {
-      // Swiss (mix of common Swiss/German/French names)
       boys: [
         "Luca Müller",
         "Noah Meier",
@@ -474,34 +512,51 @@ function builtInNames(locale: string, useGirls: boolean): string[] {
         "Nina Brunner",
         "Sara Roth",
       ],
+      unisex: [
+        "Alex Keller",
+        "Robin Frei",
+        "Sascha Weber",
+        "Noel Graf",
+        "Mika Fischer",
+        "Jamie Huber",
+        "Charlie Baumann",
+        "Ari Meier",
+        "Elia Wagner",
+        "Niki Zimmermann",
+        "Riley Roth",
+        "Kim Schmid",
+        "Skyler Brunner",
+        "Rowan Müller",
+        "Quinn Schneider",
+      ],
     },
   };
   const bucket = data[lc] || data.en;
-  return useGirls ? bucket.girls.slice() : bucket.boys.slice();
+  return bucket[set] ? bucket[set].slice() : bucket.boys.slice();
 }
 
 function builtInMobileNumbers(): string[] {
   return [
-    "(555) 010-1001",
-    "(555) 010-1002",
-    "(555) 010-1003",
-    "(555) 010-1004",
-    "(555) 010-1005",
-    "(555) 010-1006",
-    "(555) 010-1007",
-    "(555) 010-1008",
-    "(555) 010-1009",
-    "(555) 010-1010",
-    "+46 70 123 45 67",
-    "+46 73 234 56 78",
-    "+41 79 123 45 67",
-    "+41 76 234 56 78",
-    "+44 7700 900123",
-    "+44 7700 900456",
-    "+1 (202) 555-0175",
-    "+1 (415) 555-0134",
-    "+1 (212) 555-0198",
-    "+1 (646) 555-0123",
+    "070 123 1001",
+    "070 123 1002",
+    "070 123 1003",
+    "070 123 1004",
+    "070 123 1005",
+    "070 123 1006",
+    "070 123 1007",
+    "070 123 1008",
+    "070 123 1009",
+    "070 123 1010",
+    "070 123 9001",
+    "070 123 1345",
+    "070 123 7985",
+    "070 123 7854",
+    "070 123 9001",
+    "070 123 1456",
+    "070 123 0175",
+    "070 123 0134",
+    "070 123 0198",
+    "070 123 0123",
   ];
 }
 
@@ -601,11 +656,11 @@ figma.ui.onmessage = async (msg: any) => {
 
   if (msg.type === "scan") {
     try {
-      const useGirls = msg.nameSet === "girls";
+      const nameSet = msg.nameSet || "boys";
       const locale = normalizeLocale(msg.locale || "en");
 
       // Preview from built-ins
-      const namePreview = builtInNames(locale, useGirls).slice(0, 5);
+      const namePreview = builtInNames(locale, nameSet).slice(0, 5);
       const numberPreview = builtInShirtNumbers(10);
 
       const sel = figma.currentPage.selection || [];
@@ -624,7 +679,7 @@ figma.ui.onmessage = async (msg: any) => {
         names: {
           source: "built-in",
           locale,
-          gender: useGirls ? "girls" : "boys",
+          gender: nameSet,
           preview: namePreview,
         },
         numbers: { source: "built-in", preview: numberPreview },
@@ -639,7 +694,10 @@ figma.ui.onmessage = async (msg: any) => {
 
   if (msg.type === "populate") {
     try {
-      const useGirls = msg.nameSet === "girls";
+      const nameSet: "boys" | "girls" | "unisex" =
+        msg.nameSet === "girls" || msg.nameSet === "unisex"
+          ? msg.nameSet
+          : "boys";
       const startNum =
         typeof msg.startNumber === "number" && msg.startNumber > 0
           ? msg.startNumber | 0
@@ -669,7 +727,7 @@ figma.ui.onmessage = async (msg: any) => {
         typeof msg.teamFolder === "string" ? msg.teamFolder : "";
 
       // Built-in only data
-      let names = builtInNames(locale, useGirls);
+      let names = builtInNames(locale, nameSet);
       let numbers = builtInShirtNumbers(25);
 
       if (!names.length) {
@@ -766,7 +824,7 @@ figma.ui.onmessage = async (msg: any) => {
 
         // Optionally add/update an avatar (image or vector) if requested
         if (useAvatar) {
-          const gender = useGirls ? "girls" : "boys";
+          const gender = nameSet === "girls" ? "girls" : "boys"; // treat unisex as boys for palette
           const target = findAvatarTargetGeneric(node);
 
           if (

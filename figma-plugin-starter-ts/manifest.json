@@ -1,6 +1,6 @@
 {
-  "name": "Figma Plugin Starter (TS)",
-  "id": "figma-plugin-starter-ts-demo",
+  "name": "Sporstwik Avatars",
+  "id": "1564981337272340455",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
@@ -14,5 +14,6 @@
       "https://rsms.me",
       "https://rsms.me/inter/font-files/"
     ]
-  }
+  },
+  "documentAccess": "dynamic-page"
 }
