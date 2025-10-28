@@ -10,7 +10,9 @@
     "allowedDomains": [
       "https://raw.githubusercontent.com",
       "https://cdn.jsdelivr.net",
-      "https://unpkg.com"
+      "https://unpkg.com",
+      "https://rsms.me",
+      "https://rsms.me/inter/font-files/"
     ]
   }
 }

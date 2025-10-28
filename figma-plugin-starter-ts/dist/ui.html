@@ -18,6 +18,15 @@
         align-items: center;
         flex-wrap: wrap;
       }
+      .rowDan {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        border-bottom: 1px solid var(--c-medium-grey);
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+      }
       #log {
         background: #f6f8fb;
         border: 1px solid #dfe3ea;
@@ -25,118 +34,480 @@
         padding: 8px;
         height: 120px;
         overflow: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       }
       .section + .section {
+        margin-top: 16px;
+      }
+      /* Field spacing */
+      .field + .field {
         margin-top: 8px;
+      }
+
+      /* Helper/caption text */
+      .helper {
+        margin-top: 6px;
+        opacity: 0.7;
+      }
+
+      /* Align form elements to left edge and unify typography */
+      .checkbox__label {
+        font-size: 13px;
+        font-family: Inter, sans-serif;
+        line-height: 20px;
+        display: flex;
+        height: auto;
+        margin-left: 6px;
+      }
+
+      /* Align form elements to left edge and unify typography */
+      .label.label,
+      .radio__label,
+      .helper,
+      .button,
+      input,
+      select {
+        font-size: 13px;
+        font-family: Inter, sans-serif;
+        line-height: 20px;
+        display: flex;
+        height: auto;
+      }
+      .section,
+      .field,
+      .input {
+        align-items: flex-start;
+      }
+      label.label {
+        display: block;
+        margin-bottom: 8px;
+        padding-left: 0;
+      }
+      .checkbox,
+      .radio {
+        align-items: center;
+      }
+
+      .radio__label {
+        margin-left: 4px;
+      }
+
+      /* Force consistent left alignment for all form fields */
+      .section,
+      .field,
+      .input {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .checkbox,
+      .radio {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .label,
+      .radio__label,
+      .helper {
+        margin-left: 0 !important;
+      }
+
+      .field select.select-menu,
+      .field input.input__field {
+        align-self: stretch;
+      }
+
+      /* Right-aligned actions */
+      .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        margin-top: 0px;
+      }
+
+      /* Compact number input */
+      .input--short {
+        width: 80px;
+        display: block;
+      }
+
+      /* Figma-like number input */
+      input[type="number"].input__field {
+        appearance: textfield;
+        -moz-appearance: textfield;
+        border: 1px solid var(--c-medium-grey);
+        border-radius: 6px;
+        background-color: var(--c-light-grey);
+        font-family: Inter, sans-serif;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 4px 8px;
+        color: var(--c-black);
+        width: 100%;
+      }
+      input[type="number"].input__field:hover {
+        background-color: #ffffff;
+        border-color: #b3b3b3;
+      }
+      input[type="number"].input__field:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 1px var(--c-primary) inset;
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button {
+        opacity: 1;
+        appearance: none;
+        -webkit-appearance: none;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10"><path fill="%23999" d="M5 0l3 3H2zM2 7l3 3 3-3z"/></svg>')
+          no-repeat center;
+        background-position: right 4px center;
+      }
+
+      /* Reveal avatar style radios when checkbox checked (no JS needed) */
+      #avatarStyleRow {
+        display: none;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      #useAvatar:checked ~ #avatarStyleRow {
+        display: flex;
+      }
+
+      /* Fallback: show native select if DS enhancement fails to load */
+      select.select-menu {
+        display: block;
+        width: 100%;
+      }
+      /* Figma-like dropdown appearance */
+      select.select-menu {
+        appearance: none;
+        -webkit-appearance: none;
+        border: 1px solid var(--c-medium-grey);
+        border-radius: 6px;
+        background-color: var(--c-light-grey);
+        font-family: Inter, sans-serif;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 4px 28px 4px 8px;
+        color: var(--c-black);
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><path fill="%23999" d="M0 0l5 6 5-6z"/></svg>');
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 10px 6px;
+      }
+      select.select-menu:hover {
+        background-color: #ffffff;
+        border-color: #b3b3b3;
+      }
+      select.select-menu:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 1px var(--c-primary) inset;
+      }
+
+      /* Custom Figma-like checkbox */
+      .checkbox-custom {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: Inter, sans-serif;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--c-black);
+        cursor: pointer;
+        user-select: none;
+      }
+      .checkbox-custom input[type="checkbox"] {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--c-medium-grey);
+        border-radius: 3px;
+        appearance: none;
+        -webkit-appearance: none;
+        background-color: #fff;
+        margin: 0;
+        cursor: pointer;
+      }
+      .checkbox-custom input[type="checkbox"]:hover {
+        border-color: #888;
+      }
+      .checkbox-custom input[type="checkbox"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 1px var(--c-primary) inset;
+        border-color: var(--c-primary);
+      }
+      .checkbox-custom input[type="checkbox"]:checked {
+        background-color: var(--c-primary);
+        border-color: var(--c-primary);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 12px 12px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14"><path d="M3 7l3 3 6-6" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+      }
+
+      /* Custom Figma-like radio */
+      .radio-custom {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .radio-custom input[type="radio"] {
+        width: 14px;
+        height: 14px;
+        border: 1px solid var(--c-medium-grey);
+        border-radius: 50%;
+        appearance: none;
+        -webkit-appearance: none;
+        background-color: #fff;
+        margin: 0;
+        position: relative;
+      }
+      .radio-custom input[type="radio"]:hover {
+        border-color: #888;
+      }
+      .radio-custom input[type="radio"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 1px var(--c-primary) inset;
+        border-color: var(--c-primary);
+      }
+      .radio-custom input[type="radio"]:checked {
+        border-color: var(--c-primary);
+      }
+      .radio-custom input[type="radio"]:checked::after {
+        content: "";
+        position: absolute;
+        inset: 3px;
+        border-radius: 50%;
+        background: var(--c-primary);
+      }
+
+      /* --- Unified color palette --- */
+      :root {
+        --c-primary: #007aff; /* Figma blue */
+        --c-black: #000000;
+        --c-dark-grey: #6e6e6e;
+        --c-medium-grey: #e0e0e0;
+        --c-light-grey: #f9f9f9;
+      }
+
+      /* --- Unified type scale --- */
+      :root {
+        --t-font: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI,
+          Roboto, Helvetica, Arial, sans-serif;
+      }
+      .t-header {
+        font-family: var(--t-font);
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 24px;
+        color: var(--c-black);
+      }
+      .t-subheader {
+        font-family: var(--t-font);
+        font-weight: 600;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--c-dark-grey);
+      }
+      .t-label {
+        font-family: var(--t-font);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--c-dark-grey);
+      }
+      .t-body {
+        font-family: var(--t-font);
+        font-weight: 400;
+        font-size: 13px;
+        line-height: 20px;
+        color: var(--c-black);
+      }
+      .t-primary {
+        color: var(--c-primary);
+        font-weight: 400;
+      }
+      /* --- Custom Figma-like buttons --- */
+      .btn {
+        font-family: var(--t-font);
+        font-size: 13px;
+        line-height: 20px;
+        font-weight: 500;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        transition: all 0.15s ease-in-out;
+      }
+      .btn-primary {
+        background-color: var(--c-primary);
+        color: #fff;
+        border: 1px solid var(--c-primary);
+      }
+      .btn-primary:hover {
+        background-color: #006ae6;
+      }
+      .btn-primary:active {
+        background-color: #005ac2;
+      }
+      .btn-secondary {
+        background-color: #fff;
+        color: var(--c-primary);
+        border: 1px solid var(--c-primary);
+      }
+      .btn-secondary:hover {
+        background-color: var(--c-light-grey);
+      }
+      .btn-secondary:active {
+        background-color: var(--c-medium-grey);
+      }
+      /* --- Loader / Spinner --- */
+      .spinner-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(255, 255, 255, 0.75);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 999;
+      }
+      .spinner-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 2px solid var(--c-medium-grey);
+        border-top-color: var(--c-primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      .spinner-text {
+        font-family: var(--t-font);
+        font-size: 13px;
+        color: var(--c-dark-grey);
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
       }
     </style>
   </head>
   <body class="container container--thin">
-    <div class="section">
-      <div class="type type--large type--bold">Populate Lineup</div>
+    <!-- Row Dan -->
+    <div class="rowDan">
+      <div class="section">
+        <h1 class="t-header">Populate lineup</h1>
+      </div>
     </div>
+    <!-- Row Dan -->
 
-    <!-- Hidden base (unchanged) -->
-    <input
-      id="imgBase"
-      type="hidden"
-      value="https://cdn.jsdelivr.net/gh/DanBilly13/playerAvatars@main"
-    />
+    <!-- Row Dan -->
+    <div class="rowDan">
+      <!-- Hidden base (unchanged) -->
+      <input
+        id="imgBase"
+        type="hidden"
+        value="https://cdn.jsdelivr.net/gh/DanBilly13/playerAvatars@main"
+      />
 
-    <div class="section">
-      <div class="input">
-        <label class="label" for="teamFolder">Avatar set</label>
-        <div class="select select--full">
-          <select id="teamFolder" class="select__element">
+      <div class="section">
+        <div class="input">
+          <label class="label t-label" for="teamFolder">Avatar set</label>
+          <!-- Figma Plugin DS native select -->
+          <select id="teamFolder" class="select-menu">
             <option value="blueTeamBoys" selected>Blue Team — Boys</option>
             <option value="blueTeamGirls">Blue Team — Girls</option>
             <option value="redTeamBoys">Red Team — Boys</option>
             <option value="redTeamGirls">Red Team — Girls</option>
           </select>
-          <div class="select__icon icon icon--chevron-down"></div>
         </div>
       </div>
-      <div class="type type--11 type--pos-negative" style="margin-top: 6px">
-        Loads 01.png, 02.png, … from the selected folder.
+    </div>
+    <!-- Row Dan -->
+
+    <div class="rowDan">
+      <div class="field">
+        <label class="label t-label" for="start">Starting number</label>
+        <input
+          id="start"
+          type="number"
+          min="1"
+          value="1"
+          class="input__field input--short"
+        />
       </div>
     </div>
 
-    <div class="divider"></div>
-
-    <div class="section">
-      <div class="row">
-        <div class="input">
-          <label class="label" for="start">Start shirt number</label>
-          <input
-            id="start"
-            type="number"
-            min="1"
-            value="1"
-            class="input__field"
-          />
-        </div>
-        <label class="checkbox" style="margin-top: 18px">
-          <input id="shuffle" type="checkbox" class="checkbox__box" />
-          <div class="checkbox__label">Shuffle names</div>
-        </label>
-      </div>
+    <div class="rowDan">
+      <label class="checkbox-custom t-body">
+        <input id="shuffle" type="checkbox" />
+        <span>Shuffle names</span>
+      </label>
     </div>
 
-    <div class="section">
-      <label class="checkbox">
-        <input id="useAvatar" type="checkbox" class="checkbox__box" />
-        <div class="checkbox__label">Include avatars</div>
+    <div class="rowDan">
+      <label class="checkbox-custom t-body">
+        <input id="useAvatar" type="checkbox" />
+        <span>Include avatars</span>
       </label>
 
-      <div
-        class="row"
-        id="avatarStyleRow"
-        style="display: none; margin-top: 8px"
-      >
-        <label class="radio">
-          <input
-            type="radio"
-            name="avatarStyle"
-            value="vector"
-            class="radio__button"
-          />
-          <div class="radio__label">Vector initials</div>
+      <div class="row" id="avatarStyleRow">
+        <label class="radio-custom t-body">
+          <input type="radio" name="avatarStyle" value="vector" />
+          <span>Vector initials</span>
         </label>
-        <label class="radio">
-          <input
-            type="radio"
-            name="avatarStyle"
-            value="image"
-            class="radio__button"
-            checked
-          />
-          <div class="radio__label">Image PNGs</div>
+        <label class="radio-custom t-body">
+          <input type="radio" name="avatarStyle" value="image" checked />
+          <span>Image PNGs</span>
         </label>
       </div>
     </div>
 
-    <div class="section">
-      <div class="row">
-        <button id="scan" class="button button--secondary">Scan</button>
-        <button id="populate" class="button button--primary">
-          Populate selection
+    <div class="rowDan">
+      <div class="actions">
+        <button id="scan" class="btn btn-secondary">Scan</button>
+        <button id="populate" class="btn btn-primary">Populate</button>
+      </div>
+    </div>
+
+    <div class="rowDan">
+      <div class="t-subheader">How to use</div>
+      <div class="t-body" style="margin-top: 6px">
+        Selection must contain text layers named
+        <span class="t-primary">player-name</span> and
+        <span class="t-primary">shirt-number</span>.<br />
+        Include a shape named <span class="t-primary">avatar</span>,
+        <span class="t-primary">player-avatar</span>, or
+        <span class="t-primary">photo</span> — the plugin updates its first
+        fill.
+      </div>
+    </div>
+
+    <pre id="log" class="type type--small"></pre>
+
+    <div id="spinner" class="spinner-overlay" aria-hidden="true" role="status">
+      <div class="spinner-box">
+        <div class="spinner" aria-label="Loading"></div>
+        <div class="spinner-text">Populating… this can take a moment</div>
+        <button
+          id="spinner-hide"
+          class="btn btn-secondary"
+          style="padding: 4px 8px; font-weight: 400"
+        >
+          Hide
         </button>
       </div>
-      <div
-        class="type type--11 type--pos-negative"
-        style="margin-top: 8px; line-height: 1.35"
-      >
-        Selection must contain text layers named
-        <span class="type type--bold">player-name</span> and
-        <span class="type type--bold">shirt-number</span>.<br />
-        Include a shape named <span class="type type--bold">avatar</span>,
-        <span class="type type--bold">player-avatar</span>, or
-        <span class="type type--bold">photo</span> — the plugin updates its
-        first fill.
-      </div>
     </div>
-
-    <pre id="log" class="type type--12"></pre>
 
     <script>
       const log = (obj) => {
@@ -145,27 +516,48 @@
           typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
       };
 
-      const useAvatarEl = document.getElementById("useAvatar");
-      const avatarStyleRow = document.getElementById("avatarStyleRow");
-      function updatePickerVisibility() {
-        const styleRadios = Array.from(
-          document.querySelectorAll('input[name="avatarStyle"]')
-        );
-        const avatarMode =
-          (styleRadios.find((r) => r.checked) || {}).value || "vector";
-        avatarStyleRow.style.display = useAvatarEl.checked ? "flex" : "none";
+      // Spinner helpers
+      const spinnerEl = document.getElementById("spinner");
+      const hideSpinnerBtn = document.getElementById("spinner-hide");
+      const scanBtn = document.getElementById("scan");
+      const populateBtn = document.getElementById("populate");
+      let spinnerTimeout = null;
+      function showSpinner() {
+        spinnerEl.style.display = "flex";
+        scanBtn.disabled = true;
+        populateBtn.disabled = true;
+        // Safety auto-hide after 60s (does not cancel the job, only the overlay)
+        clearTimeout(spinnerTimeout);
+        spinnerTimeout = setTimeout(hideSpinner, 60000);
       }
-      document
-        .querySelectorAll('input[name="avatarStyle"]')
-        .forEach((r) => r.addEventListener("change", updatePickerVisibility));
-      useAvatarEl.addEventListener("change", updatePickerVisibility);
-      updatePickerVisibility();
+      function hideSpinner() {
+        spinnerEl.style.display = "none";
+        scanBtn.disabled = false;
+        populateBtn.disabled = false;
+        clearTimeout(spinnerTimeout);
+      }
+      hideSpinnerBtn.addEventListener("click", hideSpinner);
+
+      // Initialize Figma DS select menu and wire it to hidden input
+      try {
+        if (window.selectMenu && typeof window.selectMenu.init === "function") {
+          window.selectMenu.init();
+        }
+      } catch (e) {
+        /* no-op: DS script optional */
+      }
 
       onmessage = (event) => {
         const msg = event.data.pluginMessage;
         if (!msg) return;
         if (msg.type === "scan-result") log(msg.payload);
-        if (msg.type === "error") log(msg.payload);
+        if (msg.type === "error") {
+          log(msg.payload);
+          hideSpinner();
+        }
+        if (msg.type === "populate-done") {
+          hideSpinner();
+        }
       };
 
       document.getElementById("scan").onclick = () => {
@@ -201,9 +593,9 @@
         const imgBase =
           imgBaseEl && "value" in imgBaseEl ? imgBaseEl.value : "";
         const teamFolderEl = document.getElementById("teamFolder");
-        const teamFolder =
-          teamFolderEl && "value" in teamFolderEl ? teamFolderEl.value : "";
+        const teamFolder = teamFolderEl ? teamFolderEl.value : "";
 
+        showSpinner();
         parent.postMessage(
           {
             pluginMessage: {

@@ -538,10 +538,12 @@ figma.ui.onmessage = async (msg: any) => {
 
       if (!names.length) {
         figma.notify("No built-in names available");
+        postToUI("error", "No built-in names available");
         return;
       }
       if (!numbers.length) {
         figma.notify("No built-in numbers available");
+        postToUI("error", "No built-in numbers available");
         return;
       }
 
@@ -555,6 +557,7 @@ figma.ui.onmessage = async (msg: any) => {
       const sel = figma.currentPage.selection || [];
       if (!sel.length) {
         figma.notify("Select frames/instances to populate");
+        postToUI("error", "Select frames/instances to populate");
         return;
       }
 
@@ -628,6 +631,7 @@ figma.ui.onmessage = async (msg: any) => {
       }
 
       figma.notify("Populated " + count + " item(s).");
+      postToUI("populate-done", { count });
     } catch (e: any) {
       postToUI("error", "Populate failed: " + (e?.message || e));
       figma.notify("Populate failed — see UI log.");

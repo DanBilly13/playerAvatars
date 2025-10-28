@@ -507,10 +507,12 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
             let numbers = builtInShirtNumbers(25);
             if (!names.length) {
                 figma.notify("No built-in names available");
+                postToUI("error", "No built-in names available");
                 return;
             }
             if (!numbers.length) {
                 figma.notify("No built-in numbers available");
+                postToUI("error", "No built-in numbers available");
                 return;
             }
             const namesOrdered = names.slice();
@@ -523,6 +525,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
             const sel = figma.currentPage.selection || [];
             if (!sel.length) {
                 figma.notify("Select frames/instances to populate");
+                postToUI("error", "Select frames/instances to populate");
                 return;
             }
             let remoteAvatars = [];
@@ -589,6 +592,7 @@ figma.ui.onmessage = (msg) => __awaiter(void 0, void 0, void 0, function* () {
                 count++;
             }
             figma.notify("Populated " + count + " item(s).");
+            postToUI("populate-done", { count });
         }
         catch (e) {
             postToUI("error", "Populate failed: " + ((e === null || e === void 0 ? void 0 : e.message) || e));
