@@ -293,18 +293,26 @@ async function loadRemoteAvatarBytes(
 
   for (let i = 1; i <= maxCount; i++) {
     const n = String(i).padStart(2, "0");
-    const url = `${clean}/${dir}/${n}.png`;
-    try {
-      const res = await fetch(url);
-      if (!res.ok) {
-        consecutiveMisses++;
-        if (consecutiveMisses >= MISS_LIMIT && out.length > 0) break;
-        continue;
+    const exts = [".png", ".jpg", ".jpeg", ".webp"]; // try in order
+    let found = false;
+
+    for (const ext of exts) {
+      const url = `${clean}/${dir}/${n}${ext}`;
+      try {
+        const res = await fetch(url);
+        if (res.ok) {
+          const buf = await res.arrayBuffer();
+          out.push(new Uint8Array(buf));
+          consecutiveMisses = 0;
+          found = true;
+          break; // stop trying other extensions for this index
+        }
+      } catch {
+        // ignore and try next extension
       }
-      const buf = await res.arrayBuffer();
-      out.push(new Uint8Array(buf));
-      consecutiveMisses = 0;
-    } catch {
+    }
+
+    if (!found) {
       consecutiveMisses++;
       if (consecutiveMisses >= MISS_LIMIT && out.length > 0) break;
     }
@@ -342,6 +350,18 @@ function setImageFillOnTarget(target: SceneNode & GeometryMixin, image: Image) {
 }
 
 // ---- Built-in data (so plugin is shareable without any setup) ----
+
+function emailFromName(fullName: string, domain: string = "mail.com"): string {
+  const base = (fullName || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "") // strip diacritics
+    .replace(/[^A-Za-z0-9\s]+/g, " ") // drop punctuation
+    .trim()
+    .replace(/\s+/g, ".")
+    .toLowerCase();
+  const cleanDomain = (domain || "mail.com").replace(/^@+/, "").trim();
+  return base ? `${base}@${cleanDomain}` : `user@${cleanDomain}`;
+}
 function builtInNames(locale: string, useGirls: boolean): string[] {
   const lc = normalizeLocale(locale);
   const data: Record<string, { boys: string[]; girls: string[] }> = {
@@ -460,6 +480,104 @@ function builtInNames(locale: string, useGirls: boolean): string[] {
   return useGirls ? bucket.girls.slice() : bucket.boys.slice();
 }
 
+function builtInMobileNumbers(): string[] {
+  return [
+    "(555) 010-1001",
+    "(555) 010-1002",
+    "(555) 010-1003",
+    "(555) 010-1004",
+    "(555) 010-1005",
+    "(555) 010-1006",
+    "(555) 010-1007",
+    "(555) 010-1008",
+    "(555) 010-1009",
+    "(555) 010-1010",
+    "+46 70 123 45 67",
+    "+46 73 234 56 78",
+    "+41 79 123 45 67",
+    "+41 76 234 56 78",
+    "+44 7700 900123",
+    "+44 7700 900456",
+    "+1 (202) 555-0175",
+    "+1 (415) 555-0134",
+    "+1 (212) 555-0198",
+    "+1 (646) 555-0123",
+  ];
+}
+
+function builtInPersonalIds(count: number = 20): string[] {
+  const out: string[] = [];
+  const seeds: Array<[number, number, number]> = [
+    [1992, 3, 12],
+    [1994, 6, 28],
+    [1996, 10, 5],
+    [1998, 0, 17],
+    [1999, 8, 3],
+    [2001, 1, 9],
+    [2002, 4, 21],
+    [2003, 7, 14],
+    [2004, 11, 30],
+    [2005, 2, 8],
+  ];
+  let seq = 1234;
+  for (let i = 0; i < count; i++) {
+    const [y, m, d] = seeds[i % seeds.length];
+    const yyyy = String(y);
+    const mm = String(m + 1).padStart(2, "0");
+    const dd = String(d).padStart(2, "0");
+    const xxxx = String(seq + i)
+      .padStart(4, "0")
+      .slice(-4);
+    out.push(`${yyyy}${mm}${dd}-${xxxx}`);
+  }
+  return out;
+}
+
+function formatDateYMD(d: Date): string {
+  // Produces YYYY-MM-DD (e.g., 2025-10-28)
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+function formatTimeHM(d: Date): string {
+  // 24h HH:MM in local time
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return `${hh}:${mi}`;
+}
+
+const STAFF_ROLES: string[] = [
+  "Coach",
+  "Assistant Coach",
+  "Assistant Coach",
+  "Team Manager",
+  "Physiotherapist",
+  "Safety Officer",
+  "Equipment Manager",
+  "Team Doctor",
+  "Analyst",
+  "Strength & Conditioning",
+  "Communications",
+  "Operations",
+];
+
+function roleForIndex(mode: string, i: number): string {
+  switch ((mode || "player").toLowerCase()) {
+    case "guardian":
+      return "Guardian";
+    case "staff":
+      return STAFF_ROLES[i % STAFF_ROLES.length];
+    case "mixed": {
+      const pool = ["Player", "Guardian", ...STAFF_ROLES];
+      return pool[i % pool.length];
+    }
+    case "player":
+    default:
+      return "Player";
+  }
+}
+
 function builtInShirtNumbers(count: number = 25): string[] {
   const out: string[] = [];
   for (let i = 1; i <= count; i++) out.push(String(i));
@@ -495,6 +613,11 @@ figma.ui.onmessage = async (msg: any) => {
         node: n.name,
         hasPlayerName: !!findFirstTextByName(n, "player-name"),
         hasShirtNumber: !!findFirstTextByName(n, "shirt-number"),
+        hasEmail: !!findFirstTextByName(n, "email"),
+        hasPersonalId: !!findFirstTextByName(n, "personal-id"),
+        hasDate: !!findFirstTextByName(n, "date"),
+        hasTime: !!findFirstTextByName(n, "time"),
+        hasRole: !!findFirstTextByName(n, "role"),
       }));
 
       postToUI("scan-result", {
@@ -524,6 +647,19 @@ figma.ui.onmessage = async (msg: any) => {
       const shuffleNames = !!msg.shuffle;
       const locale = normalizeLocale(msg.locale || "en");
       const useAvatar = !!msg.useAvatar;
+      const useMobile: boolean = !!msg.useMobile;
+      const useEmail: boolean = !!msg.useEmail;
+      const usePersonId: boolean = !!msg.usePersonId;
+      const useDate: boolean = !!msg.useDate;
+      const useTime: boolean = !!msg.useTime;
+      const roleMode: string =
+        typeof msg.roleMode === "string" ? msg.roleMode : "player";
+      const personIds = builtInPersonalIds(20);
+      const emailDomain: string =
+        typeof msg.emailDomain === "string" && msg.emailDomain.trim()
+          ? msg.emailDomain.trim()
+          : "mail.com";
+      const mobiles = builtInMobileNumbers();
 
       // Avatar options
       const avatarMode = msg.avatarMode || "vector"; // "vector" | "image"
@@ -554,6 +690,10 @@ figma.ui.onmessage = async (msg: any) => {
         .slice(startIdx)
         .concat(numbers.slice(0, startIdx));
 
+      const now = new Date();
+      const dateStr = formatDateYMD(now);
+      const timeStr = formatTimeHM(now);
+
       const sel = figma.currentPage.selection || [];
       if (!sel.length) {
         figma.notify("Select frames/instances to populate");
@@ -569,7 +709,7 @@ figma.ui.onmessage = async (msg: any) => {
           remoteAvatars = await loadRemoteAvatarBytes(imgBase, teamFolder, 60);
           REMOTE_CACHE[cacheKey] = remoteAvatars;
           if (!remoteAvatars || remoteAvatars.length === 0) {
-            figma.notify("No remote PNGs found — using vector avatars.");
+            figma.notify("No remote images found — using vector avatars.");
           }
         }
       }
@@ -579,6 +719,7 @@ figma.ui.onmessage = async (msg: any) => {
         const node = sel[i];
         const tName = findFirstTextByName(node, "player-name");
         const tNum = findFirstTextByName(node, "shirt-number");
+        const tMobile = findFirstTextByName(node, "mobile-number");
         if (!tName && !tNum) continue;
 
         const nameVal = namesOrdered[i % namesOrdered.length];
@@ -591,6 +732,36 @@ figma.ui.onmessage = async (msg: any) => {
         if (tNum) {
           await ensureEditable(tNum);
           tNum.characters = String(numVal);
+        }
+        if (useMobile && tMobile) {
+          await ensureEditable(tMobile);
+          tMobile.characters = String(mobiles[i % mobiles.length]);
+        }
+        const tEmail = findFirstTextByName(node, "email");
+        if (useEmail && tEmail) {
+          await ensureEditable(tEmail);
+          tEmail.characters = emailFromName(String(nameVal), emailDomain);
+        }
+        const tPersonId = findFirstTextByName(node, "personal-id");
+        if (usePersonId && tPersonId) {
+          await ensureEditable(tPersonId);
+          tPersonId.characters = String(personIds[i % personIds.length]);
+        }
+        const tDate = findFirstTextByName(node, "date");
+        if (useDate && tDate) {
+          await ensureEditable(tDate);
+          tDate.characters = dateStr;
+        }
+        const tTime = findFirstTextByName(node, "time");
+        if (useTime && tTime) {
+          await ensureEditable(tTime);
+          tTime.characters = timeStr;
+        }
+
+        const tRole = findFirstTextByName(node, "role");
+        if (tRole) {
+          await ensureEditable(tRole);
+          tRole.characters = roleForIndex(roleMode, i);
         }
 
         // Optionally add/update an avatar (image or vector) if requested

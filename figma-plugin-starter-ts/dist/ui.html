@@ -134,6 +134,28 @@
         display: block;
       }
 
+      /* Figma-like text input */
+      input[type="text"].input__field {
+        border: 1px solid var(--c-medium-grey);
+        border-radius: 6px;
+        background-color: var(--c-light-grey);
+        font-family: Inter, sans-serif;
+        font-size: 13px;
+        line-height: 20px;
+        padding: 4px 8px;
+        color: var(--c-black);
+        width: 100%;
+      }
+      input[type="text"].input__field:hover {
+        background-color: #ffffff;
+        border-color: #b3b3b3;
+      }
+      input[type="text"].input__field:focus {
+        outline: none;
+        border-color: var(--c-primary);
+        box-shadow: 0 0 0 1px var(--c-primary) inset;
+      }
+
       /* Figma-like number input */
       input[type="number"].input__field {
         appearance: textfield;
@@ -422,6 +444,23 @@
 
       <div class="section">
         <div class="input">
+          <label class="label t-label" for="namesSet">Names</label>
+          <select id="namesSet" class="select-menu">
+            <option value="en-boys" selected>English — Boys</option>
+            <option value="en-girls">English — Girls</option>
+            <option value="sv-boys">Swedish — Boys</option>
+            <option value="sv-girls">Swedish — Girls</option>
+            <option value="ch-boys">Swiss — Boys</option>
+            <option value="ch-girls">Swiss — Girls</option>
+          </select>
+          <div class="type type--small helper">
+            Choose locale + gender for the built-in name list.
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="input">
           <label class="label t-label" for="teamFolder">Avatar set</label>
           <!-- Figma Plugin DS native select -->
           <select id="teamFolder" class="select-menu">
@@ -429,6 +468,9 @@
             <option value="blueTeamGirls">Blue Team — Girls</option>
             <option value="redTeamBoys">Red Team — Boys</option>
             <option value="redTeamGirls">Red Team — Girls</option>
+            <option value="guardians">Guardians</option>
+            <option value="teamStaff">Team staff</option>
+            <option value="users">Users</option>
           </select>
         </div>
       </div>
@@ -460,7 +502,6 @@
         <input id="useAvatar" type="checkbox" />
         <span>Include avatars</span>
       </label>
-
       <div class="row" id="avatarStyleRow">
         <label class="radio-custom t-body">
           <input type="radio" name="avatarStyle" value="vector" />
@@ -469,6 +510,69 @@
         <label class="radio-custom t-body">
           <input type="radio" name="avatarStyle" value="image" checked />
           <span>Image PNGs</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="rowDan">
+      <div
+        class="section"
+        style="display: flex; flex-direction: column; gap: 8px; width: 100%"
+      >
+        <div class="t-subheader">Personal info</div>
+        <label class="checkbox-custom t-body">
+          <input id="useMobile" type="checkbox" />
+          <span>Include mobile number</span>
+        </label>
+        <label class="checkbox-custom t-body">
+          <input id="useEmail" type="checkbox" />
+          <span>Include email</span>
+        </label>
+        <label class="checkbox-custom t-body">
+          <input id="usePersonId" type="checkbox" />
+          <span>Include personal ID</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="rowDan">
+      <div
+        class="section"
+        style="display: flex; flex-direction: column; gap: 8px; width: 100%"
+      >
+        <div class="t-subheader">Date & time</div>
+        <label class="checkbox-custom t-body">
+          <input id="useDate" type="checkbox" />
+          <span>Include date</span>
+        </label>
+        <label class="checkbox-custom t-body">
+          <input id="useTime" type="checkbox" />
+          <span>Include time</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="rowDan">
+      <div
+        class="section"
+        style="display: flex; flex-direction: column; gap: 8px; width: 100%"
+      >
+        <div class="t-subheader">Role</div>
+        <label class="radio-custom t-body">
+          <input type="radio" name="roleMode" value="player" checked />
+          <span>Player</span>
+        </label>
+        <label class="radio-custom t-body">
+          <input type="radio" name="roleMode" value="guardian" />
+          <span>Guardian</span>
+        </label>
+        <label class="radio-custom t-body">
+          <input type="radio" name="roleMode" value="staff" />
+          <span>Team staff</span>
+        </label>
+        <label class="radio-custom t-body">
+          <input type="radio" name="roleMode" value="mixed" />
+          <span>Mixed</span>
         </label>
       </div>
     </div>
@@ -485,7 +589,14 @@
       <div class="t-body" style="margin-top: 6px">
         Selection must contain text layers named
         <span class="t-primary">player-name</span> and
-        <span class="t-primary">shirt-number</span>.<br />
+        <span class="t-primary">shirt-number</span>. Optionally include text
+        layers named <span class="t-primary">mobile-number</span> (phone),
+        <span class="t-primary">email</span> (address),
+        <span class="t-primary">personal-id</span> (YYYYMMDD-XXXX),
+        <span class="t-primary">date</span> (YYYY-MM-DD),
+        <span class="t-primary">time</span> (HH:MM), and
+        <span class="t-primary">role</span> (Player/Guardian/Staff).
+        <br />
         Include a shape named <span class="t-primary">avatar</span>,
         <span class="t-primary">player-avatar</span>, or
         <span class="t-primary">photo</span> — the plugin updates its first
@@ -561,33 +672,43 @@
       };
 
       document.getElementById("scan").onclick = () => {
-        const radios = Array.from(
-          document.querySelectorAll('input[name="names"]')
-        );
-        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        const namesSel = document.getElementById("namesSet");
+        const val = namesSel ? namesSel.value : "en-boys";
+        const [lc, gender] = val.split("-");
         parent.postMessage(
-          { pluginMessage: { type: "scan", nameSet: choice, locale: "en" } },
+          { pluginMessage: { type: "scan", nameSet: gender, locale: lc } },
           "*"
         );
       };
 
       document.getElementById("populate").onclick = async () => {
-        const radios = Array.from(
-          document.querySelectorAll('input[name="names"]')
-        );
-        const choice = (radios.find((r) => r.checked) || {}).value || "boys";
+        const namesSel = document.getElementById("namesSet");
+        const val = namesSel ? namesSel.value : "en-boys";
+        const [lc, gender] = val.split("-");
         const start = parseInt(
           document.getElementById("start").value || "1",
           10
         );
         const shuffle = document.getElementById("shuffle").checked;
         const useAvatar = document.getElementById("useAvatar").checked;
+        const useMobile = document.getElementById("useMobile").checked;
+        const useEmail = document.getElementById("useEmail").checked;
+        const usePersonId = document.getElementById("usePersonId").checked;
+        const useDate = document.getElementById("useDate").checked;
+        const useTime = document.getElementById("useTime").checked;
 
         const styleRadios = Array.from(
           document.querySelectorAll('input[name="avatarStyle"]')
         );
         const avatarMode =
           (styleRadios.find((r) => r.checked) || {}).value || "image";
+
+        const roleRadios = Array.from(
+          document.querySelectorAll('input[name="roleMode"]')
+        );
+        const roleMode = (
+          roleRadios.find((r) => r.checked) || { value: "player" }
+        ).value;
 
         const imgBaseEl = document.getElementById("imgBase");
         const imgBase =
@@ -600,10 +721,17 @@
           {
             pluginMessage: {
               type: "populate",
-              nameSet: choice,
+              nameSet: gender,
+              locale: lc,
               startNumber: start,
               shuffle,
               useAvatar,
+              useMobile,
+              useEmail,
+              usePersonId,
+              useDate,
+              useTime,
+              roleMode,
               avatarMode,
               imgBase,
               teamFolder,
